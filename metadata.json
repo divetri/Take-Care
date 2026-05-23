@@ -1,0 +1,6 @@
+{
+  "name": "Take Care",
+  "description": "A location-based alarm to wake you up when you're arriving at your destination.",
+  "requestFramePermissions": ["geolocation"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
