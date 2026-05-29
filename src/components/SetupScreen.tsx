@@ -400,7 +400,7 @@ export function SetupScreen({
     <div className={`flex flex-col h-full bg-gray-900`}>
       {/* Title Bar */}
       <div className={`relative z-10 flex items-center justify-between px-6 py-4 shadow-sm ${config.bgSurface} border-b ${config.border}`}>
-        <h1 className={`text-xl font-extrabold tracking-widest uppercase ${config.textMain}`}>Take Care</h1>
+        <h1 className={`text-xl font-extrabold tracking-tight ${config.textMain}`}>Take Care</h1>
         <button 
           onClick={onOpenSettings}
           className={`p-2 rounded-full transition-colors active:scale-95 hover:opacity-70 ${config.textMain}`}
@@ -468,7 +468,7 @@ export function SetupScreen({
 
       <div className={`border-t p-5 sm:p-8 shadow-[0_-10px_20px_rgba(0,0,0,0.5)] z-10 flex-1 overflow-y-auto w-full backdrop-blur-md transition-colors ${config.bgSurface} ${config.textMain} ${config.border}`}>
         
-        <div className="space-y-5 mb-8 relative">
+        <div className="flex flex-col gap-5 mb-8 relative">
           <div className="flex gap-4 items-center relative">
              <MapPin className="text-green-500 w-6 h-6 shrink-0" />
              <div className="w-full relative">
@@ -490,7 +490,7 @@ export function SetupScreen({
              </div>
           </div>
           
-          <div className="w-0.5 h-8 bg-gray-500/30 absolute left-3 top-10 -z-10"></div>
+          <div className="w-0.5 h-12 bg-gray-500/30 absolute left-3 top-8 -z-10"></div>
 
           <div className="flex gap-4 items-center">
              <MapPin className="text-blue-500 w-6 h-6 shrink-0" />
@@ -560,11 +560,11 @@ export function SetupScreen({
 
         <h2 className={`text-sm font-medium ${config.textMuted} mb-5 uppercase tracking-wider`}>Wake me up when I am...</h2>
         
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8">
+        <div className="grid grid-cols-3 gap-2 sm:gap-5 mb-8">
           {[
-            { value: 'arrive', label: 'Arriving (100m)' },
-            { value: '1_station', label: '1 Station Before' },
-            { value: '2_stations', label: '2 Stations Before' }
+            { value: 'arrive', label: <>Arriving<br/>(100m)</> },
+            { value: '1_station', label: <>1 Station<br/>Before</> },
+            { value: '2_stations', label: <>2 Stations<br/>Before</> }
           ].map((option) => {
             const isDisabled = 
               (routePath.length > 0 && option.value === '1_station' && routePath.length <= 2) ||
@@ -575,7 +575,7 @@ export function SetupScreen({
                 key={option.value}
                 onClick={() => setTrigger(option.value as AlarmTriggerType)}
                 disabled={isDisabled}
-                className={`py-5 px-5 rounded-2xl text-sm font-medium transition-all flex flex-col items-center justify-center gap-2 ${
+                className={`py-3 px-2 sm:py-5 sm:px-5 rounded-2xl text-xs sm:text-sm font-medium transition-all flex flex-col items-center justify-center text-center leading-tight gap-1 sm:gap-2 ${
                   trigger === option.value 
                   ? `${config.accentBg} ${config.accentText} border-b-[3px] border-blue-500 shadow-md scale-[1.02]` 
                   : `${config.bgMain} border ${config.border} ${config.textMuted} hover:opacity-80`

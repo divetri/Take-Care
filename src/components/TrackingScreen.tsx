@@ -1,22 +1,33 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Coordinates, ThemeType, AlarmTriggerType } from '../types';
 import { motion } from 'motion/react';
-import { MapPin, Navigation } from 'lucide-react';
+import { MapPin, Navigation, Settings } from 'lucide-react';
 import { getThemeConfig } from '../themeConfig';
 
 interface TrackingScreenProps {
   distance: number | null;
   radius: number;
   onCancel: () => void;
+  onOpenSettings: () => void;
   theme: ThemeType;
   targetStationName: string | null;
   originalDestinationName: string | null;
   triggerType: AlarmTriggerType;
 }
 
-export function TrackingScreen({ distance, radius, onCancel, theme, targetStationName, originalDestinationName, triggerType }: TrackingScreenProps) {
+export function TrackingScreen({ 
+  distance, 
+  radius, 
+  onCancel, 
+  onOpenSettings,
+  theme, 
+  targetStationName, 
+  originalDestinationName, 
+  triggerType 
+}: TrackingScreenProps) {
   const isCalculating = distance === null;
   const config = getThemeConfig(theme);
+  const [showConfirm, setShowConfirm] = useState(false);
   
   return (
     <div className={`flex flex-col h-screen overflow-hidden items-center justify-center p-6 relative transition-colors ${config.bgMain} ${config.textMain} ${config.selection}`}>
@@ -69,6 +80,16 @@ export function TrackingScreen({ distance, radius, onCancel, theme, targetStatio
         )}
       </div>
 
+      <div className="absolute top-10 right-6 z-20">
+        <button
+          onClick={onOpenSettings}
+          className={`p-3 rounded-full border transition-all ${config.bgSurface} ${config.border} ${config.textMuted} hover:opacity-80 active:scale-[0.95]`}
+          aria-label="Open Settings"
+        >
+          <Settings className="w-5 h-5 animate-[spin_8s_linear_infinite]" />
+        </button>
+      </div>
+
       <div className="absolute top-12 text-center">
         <p className={`text-xs ${config.accentText} font-mono tracking-widest uppercase`}>Alarm armed</p>
         <p className={`text-xs mt-1 ${config.textMuted}`}>Trigger distance: 100m</p>
@@ -76,12 +97,44 @@ export function TrackingScreen({ distance, radius, onCancel, theme, targetStatio
 
       <div className="absolute bottom-12 w-full px-8 max-w-md mx-auto left-0 right-0">
         <button
-          onClick={onCancel}
+          onClick={() => setShowConfirm(true)}
           className={`w-full border py-4 rounded-xl font-medium text-lg transition-all ${config.bgSurface} ${config.border} ${config.textMuted} hover:opacity-80 active:scale-[0.98]`}
         >
           Cancel Alarm
         </button>
       </div>
+
+      {showConfirm && (
+        <div className="absolute inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-6">
+          <motion.div 
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className={`w-full max-w-sm rounded-2xl p-6 shadow-2xl ${config.bgSurface} ${config.textMain} border ${config.border} text-center`}
+          >
+            <h3 className="text-xl font-bold mb-2">Are you sure?</h3>
+            <p className={`text-sm mb-6 ${config.textMuted} leading-relaxed`}>
+              Do you want to cancel the alarm tracking and return to the main screen?
+            </p>
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={() => {
+                  setShowConfirm(false);
+                  onCancel();
+                }}
+                className={`w-full py-3 rounded-xl font-medium transition-all bg-red-500 text-white hover:bg-red-600 active:scale-[0.98]`}
+              >
+                Yes, Cancel Alarm
+              </button>
+              <button
+                onClick={() => setShowConfirm(false)}
+                className={`w-full py-3 rounded-xl font-medium border transition-all ${config.bgMain} ${config.border} ${config.textMain} hover:opacity-80 active:scale-[0.98]`}
+              >
+                Keep Alarm Armed
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }

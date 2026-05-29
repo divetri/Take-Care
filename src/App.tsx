@@ -47,6 +47,7 @@ export default function App() {
 
   // Settings
   const [showSettings, setShowSettings] = useState(false);
+  const [settingsHideUsername, setSettingsHideUsername] = useState(false);
   const [settings, setSettings] = useState<AppSettings>(() => {
     const saved = localStorage.getItem('krl-alarm-settings');
     return saved ? JSON.parse(saved) : DEFAULT_SETTINGS;
@@ -245,7 +246,7 @@ export default function App() {
         <SetupScreen 
           onStartTracking={handleStartTracking}
           currentPos={currentPos}
-          onOpenSettings={() => setShowSettings(true)}
+          onOpenSettings={() => { setShowSettings(true); setSettingsHideUsername(false); }}
           theme={settings.theme}
           userName={settings.userName!}
           initialStation={initialStation}
@@ -265,6 +266,7 @@ export default function App() {
           originalDestinationName={activeOriginalDestName}
           triggerType={activeTriggerType}
           onCancel={handleCancelTracking} 
+          onOpenSettings={() => { setShowSettings(true); setSettingsHideUsername(true); }}
           theme={settings.theme}
         />
       )}
@@ -284,6 +286,7 @@ export default function App() {
           settings={settings}
           onUpdate={updateSettings}
           onClose={() => setShowSettings(false)}
+          hideUsernameReset={settingsHideUsername}
         />
       )}
     </main>

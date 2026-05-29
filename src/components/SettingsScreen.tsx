@@ -8,11 +8,18 @@ interface SettingsScreenProps {
   settings: AppSettings;
   onUpdate: (newSettings: Partial<AppSettings>) => void;
   onClose: () => void;
+  hideUsernameReset?: boolean;
 }
 
-export function SettingsScreen({ settings, onUpdate, onClose }: SettingsScreenProps) {
+export function SettingsScreen({ settings, onUpdate, onClose, hideUsernameReset = false }: SettingsScreenProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const config = getThemeConfig(settings.theme);
+
+  const triggerLightHaptic = () => {
+    if ('vibrate' in navigator) {
+      navigator.vibrate(35);
+    }
+  };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -27,16 +34,27 @@ export function SettingsScreen({ settings, onUpdate, onClose }: SettingsScreenPr
     reader.onload = (ev) => {
       if (typeof ev.target?.result === 'string') {
         onUpdate({ customSoundUrl: ev.target.result, soundPreset: 'custom' });
+        triggerLightHaptic();
       }
     };
     reader.readAsDataURL(file);
   };
 
   const handleTestAlarm = () => {
+    triggerLightHaptic();
     startAlarmAudio(settings);
     setTimeout(() => {
       stopAlarmAudio();
     }, 3000);
+  };
+
+  const handleTestVibrationOnly = () => {
+    if ('vibrate' in navigator) {
+      // Custom recognizable dual-high-impact physical alert pulse to feel immediately
+      navigator.vibrate([300, 150, 300, 150, 500]);
+    } else {
+      alert("Web Vibration API is unavailable. To test on iPhone/iOS, open the app in Safari, tap Share, and select 'Add to Home Screen'. On Android, Chrome supports it natively.");
+    }
   };
 
   const themeOptions: { value: ThemeType, label: string, icon: React.ReactNode }[] = [
@@ -77,7 +95,7 @@ export function SettingsScreen({ settings, onUpdate, onClose }: SettingsScreenPr
               {themeOptions.map(t => (
                 <button
                   key={t.value}
-                  onClick={() => onUpdate({ theme: t.value })}
+                  onClick={() => { onUpdate({ theme: t.value }); triggerLightHaptic(); }}
                   className={`flex items-center gap-2 p-3 border rounded-xl transition-all ${settings.theme === t.value ? `${config.accentBg} ${config.accentText} border-transparent` : `${config.bgMain} ${config.border} hover:opacity-80`}`}
                 >
                   {t.icon}
@@ -94,7 +112,7 @@ export function SettingsScreen({ settings, onUpdate, onClose }: SettingsScreenPr
               {alarmModeOptions.map(m => (
                 <button
                   key={m.value}
-                  onClick={() => onUpdate({ alarmMode: m.value })}
+                  onClick={() => { onUpdate({ alarmMode: m.value }); triggerLightHaptic(); }}
                   className={`flex flex-col items-center justify-center gap-2 p-3 border rounded-xl transition-all ${settings.alarmMode === m.value ? `${config.accentBg} ${config.accentText} border-transparent` : `${config.bgMain} ${config.border} hover:opacity-80`}`}
                 >
                   {m.icon}
@@ -115,7 +133,7 @@ export function SettingsScreen({ settings, onUpdate, onClose }: SettingsScreenPr
                     name="soundPreset" 
                     value={s.value} 
                     checked={settings.soundPreset === s.value} 
-                    onChange={() => onUpdate({ soundPreset: s.value })}
+                    onChange={() => { onUpdate({ soundPreset: s.value }); triggerLightHaptic(); }}
                     className="mr-3"
                   />
                   <span className="font-medium flex-1">{s.label}</span>
@@ -142,23 +160,39 @@ export function SettingsScreen({ settings, onUpdate, onClose }: SettingsScreenPr
                </div>
             )}
 
-            <button 
-              onClick={handleTestAlarm}
-              className={`mt-6 w-full flex items-center justify-center gap-2 p-3 rounded-xl font-medium transition-all ${config.buttonPrimaryBg} ${config.buttonPrimaryText} ${config.buttonPrimaryHover}`}
-            >
-              <Play className="w-4 h-4 fill-current" />
-              Test Alarm
-            </button>
+            <div className="mt-6 flex flex-col gap-3">
+              <div className="grid grid-cols-2 gap-3">
+                <button 
+                  onClick={handleTestAlarm}
+                  className={`flex items-center justify-center gap-2 p-3 rounded-xl font-medium transition-all text-xs sm:text-sm ${config.buttonPrimaryBg} ${config.buttonPrimaryText} ${config.buttonPrimaryHover}`}
+                >
+                  <Play className="w-4 h-4 fill-current" />
+                  Test Alarm
+                </button>
+                <button 
+                  onClick={handleTestVibrationOnly}
+                  className={`flex items-center justify-center gap-2 p-3 rounded-xl border border-gray-500/20 font-medium transition-all text-xs sm:text-sm bg-gray-500/10 text-current hover:bg-gray-500/20`}
+                >
+                  <Vibrate className="w-4 h-4 text-green-500 animate-pulse" />
+                  Test Vibrate
+                </button>
+              </div>
+              <p className={`text-[11px] leading-relaxed text-center font-light ${config.textMuted} mt-1`}>
+                📲 <strong>Mobile Tip:</strong> Open on your mobile phone, tap <strong>Share</strong>, then <strong>Add to Home Screen</strong> to run in immersive fullscreen with native vibration.
+              </p>
+            </div>
           </section>
 
-          <section className="pt-4 border-t border-gray-500/20">
-            <button 
-              onClick={() => onUpdate({userName: null})}
-              className={`text-sm w-full font-medium ${config.textMuted} hover:opacity-80 transition-all`}
-            >
-              Reset Username
-            </button>
-          </section>
+          {!hideUsernameReset && (
+            <section className="pt-4 border-t border-gray-500/20">
+              <button 
+                onClick={() => onUpdate({userName: null})}
+                className={`text-sm w-full font-medium ${config.textMuted} hover:opacity-80 transition-all`}
+              >
+                Reset Username
+              </button>
+            </section>
+          )}
         </div>
       </div>
     </div>
